@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.*;
 
@@ -226,16 +227,19 @@ public class RestCallTests extends ArtifactoryTestsBase {
         return response.getRawBody();
     }
 
+    @SuppressWarnings("BusyWait")
     private List getPermissionTargets() throws Exception {
         ArtifactoryRequest req = new ArtifactoryRequestImpl()
                 .method(ArtifactoryRequest.Method.GET)
                 .apiUrl("api/security/permissions")
                 .responseType(ArtifactoryRequest.ContentType.JSON);
         ArtifactoryResponse response = artifactory.restCall(req);
+        for (int i = 0; i < 120 && !response.isSuccessResponse(); i++) {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            response = artifactory.restCall(req);
+        }
         assertArtifactoryResponse(response);
-
-        List<String> responseBody = response.parseBody(List.class);
-        return responseBody;
+        return response.parseBody(List.class);
     }
 
     private Map<String, Object> createPermissionTargetBody(String permissionName) throws IOException {
