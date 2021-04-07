@@ -181,7 +181,8 @@ public class RestCallTests extends ArtifactoryTestsBase {
                 .apiUrl("api/security/permissions/" + permissionName)
                 .requestType(ArtifactoryRequest.ContentType.JSON)
                 .requestBody(map);
-        artifactory.restCall(req);
+        ArtifactoryResponse response = artifactory.restCall(req);
+        assertEquals(response.getStatusLine().getStatusCode(), 201);
 
         // Verify permission target created:
         List permissions = getPermissionTargets();
