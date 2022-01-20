@@ -1,5 +1,5 @@
 pipelines:
-  - name: create_artifactory_java_client_snapshot
+  - name: yahav_create_artifactory_java_client_snapshot
     configuration:
       runtime:
         type: image
@@ -14,15 +14,15 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: javaClientSnapshotGit
+            - name: yahavJavaClientSnapshotGit
           integrations:
             - name: entplus_deployer
         execution:
           onStart:
             # Save gradle cache
-            - restore_cache_files gradle_cache $res_javaClientSnapshotGit_resourcePath/.gradle
+            - restore_cache_files gradle_cache $res_yahavJavaClientSnapshotGit_resourcePath/.gradle
           onExecute:
-            - cd $res_javaClientSnapshotGit_resourcePath
+            - cd $res_yahavJavaClientSnapshotGit_resourcePath
 
             # Set env
             - export CI=true
@@ -63,4 +63,4 @@ pipelines:
 
           onComplete:
             # Save gradle cache
-            - add_cache_files $res_javaClientSnapshotGit_resourcePath/.gradle gradle_cache
+            - add_cache_files $res_yahavJavaClientSnapshotGit_resourcePath/.gradle gradle_cache

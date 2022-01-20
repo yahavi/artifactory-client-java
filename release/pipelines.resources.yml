@@ -1,5 +1,5 @@
 resources:
-  - name: javaClientSnapshotGit
+  - name: yahavJavaClientSnapshotGit
     type: GitRepo
     configuration:
       path: jfrog/artifactory-client-java
@@ -7,7 +7,7 @@ resources:
       branches:
         include: dev
 
-  - name: javaClientReleaseGit
+  - name: yahavJavaClientReleaseGit
     type: GitRepo
     configuration:
       path: jfrog/artifactory-client-java

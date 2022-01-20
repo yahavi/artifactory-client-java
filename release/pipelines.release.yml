@@ -1,5 +1,5 @@
 pipelines:
-  - name: release_java_client
+  - name: yahav_release_java_client
     configuration:
       runtime:
         type: image
@@ -18,14 +18,14 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: javaClientReleaseGit
+            - name: yahavJavaClientReleaseGit
           integrations:
             - name: il_automation
             - name: entplus_deployer
             - name: mvn_central
         execution:
           onExecute:
-            - cd $res_javaClientReleaseGit_resourcePath
+            - cd $res_yahavJavaClientReleaseGit_resourcePath
 
             # Set env
             - export CI=true
@@ -36,7 +36,7 @@ pipelines:
             - export GRADLE_OPTS=-Dorg.gradle.daemon=false
 
             # Configure git
-            - git checkout master
+            - git checkout 2.10.0
             - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/artifactory-client-java.git
 
             # Make sure versions provided
@@ -44,36 +44,36 @@ pipelines:
             - test -n "$NEXT_VERSION" -a "$NEXT_VERSION" != "0.0.0"
             - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.x-SNAPSHOT"
 
-            # Configure JFrog CLI
-            - curl -fL https://install-cli.jfrog.io | sh
-            - jf c rm --quiet
-            - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
-            - jf gradlec --use-wrapper --deploy-ivy-desc=false --deploy-maven-desc --uses-plugin --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-release-local
+            # # Configure JFrog CLI
+            # - curl -fL https://install-cli.jfrog.io | sh
+            # - jf c rm --quiet
+            # - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            # - jf gradlec --use-wrapper --deploy-ivy-desc=false --deploy-maven-desc --uses-plugin --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-release-local
 
-            # Sync changes with dev
-            - git merge origin/dev
+            # # Sync changes with dev
+            # - git merge origin/dev
 
-            # Run audit
-            - jf audit
+            # # Run audit
+            # - jf audit
 
-            # Update version
-            - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties
-            - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
-            - git tag ${NEXT_VERSION}
-            - git push
-            - git push --tags
+            # # Update version
+            # - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties
+            # - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
+            # - git tag ${NEXT_VERSION}
+            # - git push
+            # - git push --tags
 
-            # Run build and publish
-            - >
-              ORG_GRADLE_PROJECT_signingKey=$(echo $int_mvn_central_signingKey | base64 -d)
-              ORG_GRADLE_PROJECT_signingPassword=$int_mvn_central_signingPassword
-              jf gradle clean aP -x test
-            - jf rt bag && jf rt bce
-            - jf rt bp
+            # # Run build and publish
+            # - >
+            #   ORG_GRADLE_PROJECT_signingKey=$(echo $int_mvn_central_signingKey | base64 -d)
+            #   ORG_GRADLE_PROJECT_signingPassword=$int_mvn_central_signingPassword
+            #   jf gradle clean aP -x test
+            # - jf rt bag && jf rt bce
+            # - jf rt bp
 
-            # Distribute release bundle
-            - jf ds rbc artifactory-client-java $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
-            - jf ds rbd artifactory-client-java $NEXT_VERSION --site="releases.jfrog.io" --sync
+            # # Distribute release bundle
+            # - jf ds rbc artifactory-client-java $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            # - jf ds rbd artifactory-client-java $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Publish to Maven Central
             - >
@@ -83,10 +83,10 @@ pipelines:
               ORG_GRADLE_PROJECT_signingPassword=$int_mvn_central_signingPassword
               ./gradlew clean build publishToSonatype closeSonatypeStagingRepository -x test
 
-            # Update next development version
-            - git clean -fd
-            - git checkout dev
-            - git merge origin/master
-            - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_DEVELOPMENT_VERSION}/" gradle.properties
-            - git commit -am "[artifactory-release] Next development version [skipRun]"
-            - git push
+            # # Update next development version
+            # - git clean -fd
+            # - git checkout dev
+            # - git merge origin/master
+            # - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_DEVELOPMENT_VERSION}/" gradle.properties
+            # - git commit -am "[artifactory-release] Next development version [skipRun]"
+            # - git push
